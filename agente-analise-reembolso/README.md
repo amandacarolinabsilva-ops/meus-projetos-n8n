@@ -142,4 +142,4 @@ Este workflow lida com **dados reais de clientes** (nome, e-mail, histórico de 
 
 ---
 
-*Projeto de estudo desenvolvido com n8n, aplicando IA a um processo real de decisão de negócio. Veja também: [Assistente de Estudos via WhatsApp](../assistente-whatsapp-estudos).*
+*Projeto de estudo desenvolvido com n8n, aplicando IA a um processo real de decisão de negócio. Veja também: [Assistente de Estudos via WhatsApp](../assistente-whatsapp-estudos) — o projeto anterior desta série.*
