@@ -105,7 +105,21 @@ O formulário de solicitação de reembolso foi criado no **Tally**: [https://ta
 
 ## 📸 Prints do workflow
 
-*(adicionar print do canvas completo e, se possível, de uma simulação de cada tipo de resposta)*
+**Estrutura do workflow no n8n:**
+
+![Workflow](workflow.png)
+
+**Simulação — Cliente Comum (fora do prazo, resposta automática):**
+
+![Cenário Comum](cenario-comum.png)
+
+**Simulação — Cliente VIP (exceção aberta, time notificado):**
+
+![Cenário VIP](cenario-vip.png)
+
+**Simulação — Cliente Problemático (caso escalado, time alertado com urgência):**
+
+![Cenário Problemático](cenario-problematico.png)
 
 ## 💡 O que aprendi neste projeto
 
