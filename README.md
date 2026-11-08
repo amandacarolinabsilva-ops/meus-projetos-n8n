@@ -25,7 +25,7 @@ O maior desafio nos três foi aprender a própria plataforma: entender como o n8
 
 ## Certificado
 
-Imersão Agentes IA, da Hashtag Treinamentos (8 horas), concluída em 23/07/2026. Foi dela que veio a ideia do agente de reembolso.
+Imersão Agentes IA, da Hashtag Treinamentos (8 horas), concluída em 23/07/2026.
 
 ![Certificado Imersão Agentes IA](./certificados/certificado-imersao-agentes-ia.png)
 
