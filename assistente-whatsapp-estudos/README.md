@@ -1,6 +1,8 @@
 # Assistente de Estudos via WhatsApp
 
-Um assistente que responde pelo WhatsApp dúvidas de estudo, cursos e programação. Parti da estrutura do [Agente de Chat](../chat-basico) e acrescentei a integração com o WhatsApp pela Z-API, busca na web e um comando `/quiz` que gera perguntas sobre qualquer tema.
+Um assistente que responde pelo WhatsApp dúvidas de estudo, cursos e programação. Escolhi o WhatsApp porque é o que está sempre na mão: estudar direto por ele fica fácil, pelo menos para a parte de teoria e leitura.
+
+Parti da estrutura do [Agente de Chat](../chat-basico) e acrescentei a integração com o WhatsApp pela Z-API, busca na web e um comando `/quiz` que gera perguntas sobre qualquer tema.
 
 **Ferramentas:** n8n, Groq (`openai/gpt-oss-120b`), Z-API, Google Sheets, SerpApi, Calculator e Wikipedia
 
@@ -61,7 +63,7 @@ Teste de memória, com o assistente lembrando o que foi dito antes:
 
 ## Limitações
 
-- Escolhi a Z-API porque dava para usar de graça no projeto. A contrapartida é que, na conta gratuita, toda mensagem enviada sai com o aviso "Mensagem de teste". É coisa da plataforma, não do workflow.
+- Na conta gratuita da Z-API, toda mensagem enviada sai com o aviso "Mensagem de teste". É coisa da plataforma, não do workflow.
 - O plano gratuito da Groq tem limite de requisições. Testando muito seguido, o AI Agent pode dar erro de rate limit por um tempo.
 
 ## Segurança
