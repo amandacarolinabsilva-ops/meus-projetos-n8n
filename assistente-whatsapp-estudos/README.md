@@ -61,7 +61,7 @@ Teste de memória, com o assistente lembrando o que foi dito antes:
 
 ## Limitações
 
-- Na conta gratuita da Z-API, toda mensagem enviada sai com o aviso "Mensagem de teste". É coisa da plataforma, não do workflow.
+- Escolhi a Z-API porque dava para usar de graça no projeto. A contrapartida é que, na conta gratuita, toda mensagem enviada sai com o aviso "Mensagem de teste". É coisa da plataforma, não do workflow.
 - O plano gratuito da Groq tem limite de requisições. Testando muito seguido, o AI Agent pode dar erro de rate limit por um tempo.
 
 ## Segurança
