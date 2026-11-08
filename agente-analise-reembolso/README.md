@@ -1,145 +1,115 @@
-# 💸 Agente de Análise de Reembolso
+# Agente de Análise de Reembolso
 
-Agente de IA para automatizar o processo de solicitação de reembolso de uma empresa de venda de cursos online. O sistema classifica o cliente e a solicitação, e decide automaticamente como responder — por e-mail e/ou alertando a equipe via Telegram.
+Um agente que faz a triagem dos pedidos de reembolso de uma empresa (fictícia) de cursos online. Ele lê o pedido, cruza com o histórico do cliente, classifica o caso e decide a resposta: um e-mail automático para o cliente e, quando o caso pede atenção, um alerta para a equipe no Telegram.
 
-Terceiro projeto da série com n8n, após o [Agente de Chat](../chat-basico) e o [Assistente de Estudos via WhatsApp](../assistente-whatsapp-estudos) — aqui o foco passa de "conversas" para automação de um **processo de decisão de negócio real**.
+Nos dois projetos anteriores ([Agente de Chat](../chat-basico) e [Assistente via WhatsApp](../assistente-whatsapp-estudos)) a IA conversava. Aqui ela apoia uma decisão de negócio.
 
-## 🧰 Tecnologias utilizadas
+**Ferramentas:** n8n, Google Gemini, Tally (formulário), Google Sheets, Gmail e Telegram
 
-`n8n` · `Google Gemini (LLM)` · `Tally (formulário)` · `Google Sheets` · `Gmail` · `Telegram`
+## O problema
 
-## 📋 Contexto de negócio
+A empresa vende cursos de softwares de contabilidade, gestão de projetos, edição de vídeo, criação de sites e CRM. O cliente tem 7 dias para pedir reembolso. Depois disso perde o direito, mas na prática muita gente insatisfeita pede mesmo assim.
 
-A empresa vende cursos nas seguintes áreas:
-- Software de Contabilidade
-- Software de Gestão de Projetos
-- Software de Edição de Vídeo
-- Plataforma de Criação de Sites
-- Plataforma de CRM de Vendas
+Os pedidos dentro do prazo já são reembolsados normalmente. Este agente cuida só dos que chegam depois dos 7 dias, que são justamente os que exigem algum critério: negar um pedido de um cliente que gastou muito pode significar perder esse cliente, e responder friamente alguém muito irritado pode acabar no Reclame Aqui.
 
-**Regra de reembolso:** o cliente tem direito a reembolso em até **7 dias** após a compra. Passado esse prazo, ele perde o direito — mas, na prática, clientes insatisfeitos costumam solicitar reembolso mesmo fora do prazo, tentando reaver o dinheiro. Este agente automatiza a triagem desses casos **posteriores aos 7 dias** (casos dentro do prazo já recebem reembolso normalmente, sem passar por este fluxo).
+## Como o agente decide
 
-## 🧠 Como o agente decide
+Separei o trabalho em duas partes. A IA não decide nada. Ela só lê e organiza as informações. Quem decide são as regras do workflow.
 
-O processo é dividido em duas etapas: **extração/análise** (feita pela IA) e **decisão** (feita pela lógica condicional do workflow).
+**1. A IA extrai e organiza os dados.** O AI Agent lê a resposta do formulário e a planilha de clientes e devolve um JSON com:
 
-### Etapa 1 — O AI Agent extrai e estrutura os dados
+- nome, e-mail, produto e comentário do formulário
+- o sentimento do comentário: `positivo`, `neutro`, `negativo` ou `muito_negativo`
+- se o cliente foi encontrado na planilha, o nome completo e o total que ele já gastou
+- quantos dias se passaram desde a última compra
 
-O agente **não decide** se o reembolso será aprovado ou não. Sua única função é ler a resposta do formulário e os dados da planilha "base clientes", retornando um JSON estruturado com:
+Para o sentimento, defini critérios objetivos. `muito_negativo` é agressividade, xingamento, ameaça de Procon, Reclame Aqui ou processo, ou texto em caixa alta. Na dúvida entre `negativo` e `muito_negativo`, o prompt manda escolher `negativo`, para não escalar casos à toa.
 
-- Dados do formulário: nome, e-mail, produto, comentário
-- **Análise de sentimento** do comentário (`positivo`, `neutro`, `negativo`, `muito_negativo`)
-- Dados da planilha: se o cliente foi encontrado, nome completo e total gasto
-- **Dias desde a última compra**, calculado a partir da data da planilha e da data atual
+**2. As regras do workflow classificam e respondem.** Com o JSON pronto, os nodes If separam três situações:
 
-A análise de sentimento segue critérios objetivos (ex: `muito_negativo` = agressividade, xingamentos, ameaças de Procon/Reclame Aqui/processo/CAPS LOCK) e, em caso de dúvida entre `negativo` e `muito_negativo`, o prompt instrui o agente a ser conservador e escolher `negativo`.
+- **Cliente comum** (fora do prazo, não é VIP e não está muito irritado): recebe um e-mail automático dizendo que o prazo expirou. A equipe não é acionada.
+- **Cliente VIP** (já gastou mais de R$ 3.000 no total): recebe um e-mail dizendo que o pedido foi encaminhado para análise, e a equipe recebe um alerta no Telegram para avaliar uma exceção com o financeiro.
+- **Cliente insatisfeito** (sentimento `muito_negativo`): recebe um e-mail dizendo que o caso foi levado à gerência, e a equipe recebe um alerta de prioridade, para evitar uma reclamação pública.
 
-### Etapa 2 — A lógica condicional (nodes If) decide e direciona
-
-Com os dados estruturados, o workflow classifica e direciona a solicitação:
-
-| Classificação | Critério | Ação tomada |
-|---|---|---|
-| **Cliente Comum** | Fora do prazo de 7 dias, não é VIP, sentimento não é `muito_negativo` | Resposta automática por e-mail informando que o reembolso não é possível (prazo expirado). Não aciona a equipe. |
-| **Cliente VIP** | Total histórico de compras acima de **R$ 3.000** | E-mail avisando que o caso foi encaminhado para análise + alerta no grupo do Telegram para o time avaliar uma exceção com o financeiro |
-| **Cliente Problemático** | Sentimento classificado como `muito_negativo` | E-mail avisando que o caso foi escalado para a gerência + alerta de prioridade no Telegram, para evitar reclamação pública (Reclame Aqui/Procon) |
-
-## 🛠️ Arquitetura do workflow
+## Estrutura do workflow
 
 | Node | Função |
 |---|---|
-| **Webhook** | Recebe a resposta do formulário de reembolso (Tally) |
-| **AI Agent** | Classifica o cliente/solicitação com base nas regras de negócio |
-| **Google Gemini Chat Model** | Modelo de linguagem usado pelo agente |
-| **Get row(s) in sheet** | Busca o histórico do cliente na planilha "base clientes" |
-| **Structured Output Parser** | Garante que a resposta da IA venha em um formato estruturado e previsível |
-| **If / If1 / If2 / If4** | Direcionam o fluxo conforme a classificação do cliente |
-| **Send a message (Gmail)** | Envia a resposta por e-mail ao cliente |
-| **Send a text message (Telegram)** | Notifica a equipe interna em grupo dedicado à análise de reembolsos |
+| Webhook | Recebe a resposta do formulário do Tally |
+| AI Agent + Google Gemini Chat Model | Lê o pedido e monta o JSON |
+| Get row(s) in sheet | Busca o histórico do cliente na planilha |
+| Structured Output Parser | Garante que o JSON venha no formato esperado |
+| If, If1, If2 e If4 | Classificam o caso |
+| Send a message (Gmail) | Responde o cliente |
+| Send a text message (Telegram) | Avisa a equipe |
 
-## 💬 Templates de mensagem
+## As mensagens
 
-### Telegram (equipe interna)
+A equipe só é avisada no Telegram nos casos VIP e de cliente insatisfeito. Escrevi os alertas no tom de uma conversa entre colegas.
 
-O grupo do Telegram recebe uma notificação apenas nos casos **VIP** e **Problemático** — clientes comuns são resolvidos automaticamente por e-mail, sem necessidade de intervenção do time.
+Alerta de cliente VIP:
 
-**VIP:**
-> Pedido de Reembolso fora do Prazo
-> Pessoal, chegou um pedido de reembolso de um cliente que estourou o prazo de 7 dias (tá com X dias).
-> O sistema barrou, mas como ele é VIP, peço que verifiquem com atenção e avaliem reembolsar o aluno.
-> Avisei pra ele que a gente ia analisar com carinho e dar um retorno em 24h. Conseguem ver com o financeiro se liberamos essa exceção pra não perder o cliente?
-> Cliente: [nome] | E-mail: [email] | Produto: [produto]
+> Pessoal, chegou um pedido de reembolso de um cliente que estourou o prazo de 7 dias (tá com X dias). O sistema barrou, mas como ele é VIP, peço que verifiquem com atenção e avaliem reembolsar o aluno. Avisei pra ele que a gente ia analisar com carinho e dar um retorno em 24h. Conseguem ver com o financeiro se liberamos essa exceção pra não perder o cliente?
 
-**Reclamão:**
-> ⚠️ Atenção aqui, gente.
-> Temos um cliente que pediu reembolso fora do prazo, mas mandou uma mensagem bem pesada.
-> Pra evitar que ele vá pro Reclame Aqui ou Procon, eu já respondi dizendo que escalei o caso pra gerência. Conseguem dar uma atenção pra esse caso por favor?
-> Cliente: [nome] | E-mail: [email] | Produto: [produto]
+Alerta de cliente insatisfeito:
 
-### E-mail (resposta ao cliente)
+> Atenção aqui, gente. Temos um cliente que pediu reembolso fora do prazo, mas mandou uma mensagem bem pesada. Pra evitar que ele vá pro Reclame Aqui ou Procon, eu já respondi dizendo que escalei o caso pra gerência. Conseguem dar uma atenção pra esse caso, por favor?
 
-**Cenário 1 — Cliente Comum (rejeição padrão):**
-> Assunto: Retorno sobre sua solicitação de reembolso
->
-> Verifiquei aqui que a compra foi efetuada há mais de 7 dias. Como o prazo de garantia incondicional é de 7 dias corridos, infelizmente não conseguiremos prosseguir com o reembolso.
+Os dois alertas terminam com nome, e-mail e produto do cliente.
 
-**Cenário 2 — Cliente VIP:**
-> Assunto: Atualização sobre seu pedido de reembolso
->
-> Notei que o prazo contratual de 7 dias já expirou. Porém, como você é um dos nossos melhores clientes, encaminhei seu pedido pessoalmente para a nossa equipe financeira analisar uma exceção. Em até 24h retornaremos com uma resposta.
+Os e-mails para o cliente seguem a mesma lógica:
 
-**Cenário 3 — Sentimento Muito Negativo:**
-> Assunto: Recebemos sua mensagem - Caso escalado para a Gerência
->
-> O sistema identificou que a compra está fora do prazo de garantia. No entanto, dada a seriedade do seu relato, optei por não finalizar o atendimento por aqui e escalei seu caso com prioridade para o nosso gerente de suporte.
+- **Cliente comum:** explica que a compra passou dos 7 dias de garantia e que por isso o reembolso não é possível.
+- **Cliente VIP:** diz que o prazo expirou, mas que, por ser um dos melhores clientes, o pedido foi encaminhado ao financeiro para avaliar uma exceção, com retorno em até 24h.
+- **Cliente insatisfeito:** diz que, pela seriedade do relato, o atendimento não foi encerrado ali e o caso foi levado com prioridade ao gerente de suporte.
 
-*(Templates completos disponíveis no workflow — os e-mails usam o nome do cliente dinamicamente via variável.)*
+Os textos completos estão no workflow, com o nome do cliente preenchido por variável.
 
-## 🤖 Prompt do AI Agent (resumo)
+## O prompt
 
-O prompt segue um passo a passo rígido: (1) extrai os campos do formulário, (2) busca o cliente na planilha usando o e-mail normalizado como chave única — nunca inventando dados, (3) calcula os dias desde a última compra a partir de `{{ $now }}` e da data na planilha, (4) analisa o sentimento do comentário, e (5) retorna **apenas um JSON cru** (sem markdown), seguindo um schema fixo. Essa rigidez no formato de saída é o que permite ao **Structured Output Parser** validar a resposta antes de seguir para a lógica condicional.
+O prompt segue uma ordem fixa: extrair os campos do formulário, buscar o cliente na planilha pelo e-mail (normalizado, sem inventar dados se não encontrar), calcular os dias desde a última compra a partir de `{{ $now }}`, analisar o sentimento e devolver só o JSON, sem markdown. Deixei o formato rígido de propósito, porque é isso que permite ao Structured Output Parser validar a resposta antes de ela chegar nos Ifs.
 
-## 📝 Formulário de entrada
+## Formulário
 
-O formulário de solicitação de reembolso foi criado no **Tally**: [https://tally.so/r/rjbQWo](https://tally.so/r/rjbQWo)
+O formulário de pedido de reembolso foi feito no Tally: [tally.so/r/rjbQWo](https://tally.so/r/rjbQWo)
 
-## 📸 Prints do workflow
+## Prints
 
-**Estrutura do workflow no n8n:**
+Estrutura do workflow:
 
 ![Workflow](workflow.png)
 
-**Simulação — Cliente Comum (fora do prazo, resposta automática):**
+Cliente comum, com resposta automática:
 
 ![Cenário Comum](cenario-comum.png)
 
-**Simulação — Cliente VIP (exceção aberta, time notificado):**
+Cliente VIP, com a equipe avisada:
 
 ![Cenário VIP](cenario-vip.png)
 
-**Simulação — Cliente Problemático (caso escalado, time alertado com urgência):**
+Cliente insatisfeito, com o caso escalado:
 
 ![Cenário Problemático](cenario-problematico.png)
 
-## 💡 O que aprendi neste projeto
+## O que aprendi
 
-- Como estruturar um agente de IA para tomar decisões de negócio (não só responder perguntas)
-- Uso de **Structured Output Parser** para obter respostas confiáveis e no formato esperado
-- Integração de múltiplos canais de resposta (e-mail + Telegram) a partir de uma única lógica de decisão
-- Como usar dados históricos de uma planilha para enriquecer a decisão da IA (classificação de cliente VIP)
-- Importância de escrever prompts claros o suficiente para não deixar brechas de interpretação em regras de negócio sensíveis (como critérios de reembolso)
+- Usar a IA para organizar informação e deixar a decisão para regras que eu controlo
+- Usar o Structured Output Parser para ter respostas confiáveis e no formato certo
+- Disparar mais de um canal (e-mail e Telegram) a partir da mesma lógica
+- Usar o histórico de uma planilha para enriquecer a decisão, como no caso do cliente VIP
+- Escrever prompts sem brechas quando a regra de negócio é sensível, como no reembolso
 
-## ⚠️ Sobre segurança e privacidade
+## Segurança e privacidade
 
-Este workflow lida com **dados reais de clientes** (nome, e-mail, histórico de compras). O `.json` publicado neste repositório contém **placeholders genéricos** no lugar de credenciais, IDs de planilha, e identificadores de grupo do Telegram. Nenhum dado real de cliente está incluído nos prints ou exemplos deste repositório.
+Este workflow lida com dados de clientes (nome, e-mail e histórico de compras). O `workflow.json` publicado aqui usa valores genéricos no lugar das credenciais, do ID da planilha e do grupo do Telegram, e os prints não mostram dados reais.
 
-## 🚀 Como usar
+## Como usar
 
-1. Importe o arquivo `workflow.json` desta pasta no seu n8n (**Menu → Import from File**)
-2. Configure suas próprias credenciais (Google Gemini, Google Sheets, Gmail, Telegram)
-3. Ajuste o link do formulário Tally (ou substitua por outro formulário de sua preferência)
-4. Adapte os critérios de classificação (ex: valor de corte para cliente VIP) conforme a realidade do seu negócio
+1. Importe o `workflow.json` no n8n (Menu > Import from File)
+2. Configure suas credenciais do Gemini, Google Sheets, Gmail e Telegram
+3. Troque o link do formulário do Tally pelo seu, ou use outro formulário
+4. Ajuste os critérios, como o valor que define um cliente VIP, para a realidade do seu negócio
 
 ---
 
-*Projeto desenvolvido com n8n, aplicando IA a um processo real de decisão de negócio. Veja também: [Assistente de Estudos via WhatsApp](../assistente-whatsapp-estudos) — o projeto anterior desta série.*
+Projeto anterior: [Assistente de Estudos via WhatsApp](../assistente-whatsapp-estudos).
