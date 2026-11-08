@@ -1,68 +1,56 @@
-# 🤖 Agente de Chat com IA no n8n
+# Agente de Chat com IA no n8n
 
-Agente de chat com inteligência artificial construído no **n8n**, combinando modelo de linguagem, memória de conversa e ferramentas externas (tools) — a estrutura base de um AI Agent.
+Um agente de chat que responde pelo chat web do n8n, lembra o que foi dito na conversa e usa ferramentas quando precisa fazer uma conta ou buscar uma informação. Foi aqui que montei a estrutura que uso nos outros projetos: modelo, memória e ferramentas.
 
-## 🧰 Tecnologias utilizadas
+**Ferramentas:** n8n, Groq, Google Sheets, Calculator e Wikipedia (tools do LangChain)
 
-`n8n` · `Groq (LLM)` · `Google Sheets` · `LangChain Tools (Calculator, Wikipedia)`
+## Como funciona
 
-## 📋 O que o agente faz
-
-- Recebe mensagens através de um **chat web** (trigger "When chat message received")
-- Registra cada conversa em uma **planilha do Google Sheets** (ID da conversa + mensagem)
-- Processa a mensagem usando um **AI Agent**, que decide se precisa usar alguma ferramenta ou responder diretamente
-- Mantém o **histórico da conversa** (memória), lembrando informações mencionadas anteriormente na mesma sessão
-- Pode usar ferramentas externas quando necessário:
-  - 🧮 **Calculator** — para cálculos matemáticos
-  - 📚 **Wikipedia** — para buscar informações enciclopédicas
-
-## 🛠️ Nodes utilizados
+A mensagem chega pelo gatilho de chat do n8n e é registrada numa planilha do Google Sheets (ID da conversa e texto). Depois vai para o AI Agent, que decide se responde direto ou se chama uma ferramenta: a Calculator para contas e a Wikipedia para conceitos e definições. A Simple Memory guarda o histórico da sessão, então o agente lembra o que foi falado antes.
 
 | Node | Função |
 |---|---|
-| **When chat message received** | Gatilho que inicia o fluxo ao receber uma mensagem |
-| **Edit Fields** | Organiza os dados da mensagem recebida |
-| **Append row in sheet** | Salva a conversa no Google Sheets |
-| **AI Agent** | Node principal, orquestra o raciocínio e as ferramentas |
-| **Chat Model (Groq)** | Modelo de linguagem que gera as respostas |
-| **Simple Memory** | Guarda o histórico da conversa por sessão |
-| **Calculator** | Ferramenta para operações matemáticas |
-| **Wikipedia** | Ferramenta para buscas enciclopédicas |
+| When chat message received | Gatilho do fluxo |
+| Edit Fields | Organiza os dados da mensagem |
+| Append row in sheet | Salva a conversa no Google Sheets |
+| AI Agent | Decide o que fazer e quando usar cada ferramenta |
+| Chat Model (Groq) | Gera as respostas |
+| Simple Memory | Guarda o histórico por sessão |
+| Calculator e Wikipedia | Ferramentas do agente |
 
-## 🧠 Escolha do modelo de IA
+## A escolha do modelo
 
-Utilizei o **Groq** como provedor do modelo de linguagem. Durante o desenvolvimento, testei três opções e documentei o motivo da escolha final:
+Testei três modelos da Groq até chegar num que funcionasse:
 
-| Modelo testado | Resultado |
-|---|---|
-| `groq/compound` | ❌ Não compatível com tool calling customizado (ferramentas próprias conectadas ao AI Agent) |
-| `llama-3.3-70b-versatile` | ⚠️ Funcionou, mas foi descontinuado pela Groq |
-| `openai/gpt-oss-120b` | ✅ Modelo final escolhido — suporte completo a tool calling |
+- `groq/compound` não funcionou, porque não aceita ferramentas próprias conectadas ao AI Agent.
+- `llama-3.3-70b-versatile` funcionou, mas a Groq descontinuou o modelo.
+- `openai/gpt-oss-120b` foi o que ficou: suporta tool calling sem problema.
 
-## 📸 Prints do workflow
+Foi com isso que entendi que nem todo modelo sabe usar ferramentas, e que vale conferir isso antes de montar o fluxo.
 
-**Estrutura do workflow no n8n:**
+## Prints
+
+Estrutura do workflow:
 
 ![Workflow](workflow.png)
 
-**Exemplo de conversa com o agente:**
+Exemplo de conversa:
 
 ![Conversa](conversa.png)
 
-## 💡 O que aprendi
+## O que aprendi
 
-- Como estruturar um AI Agent no n8n conectando Model, Memory e Tools
-- A diferença entre modelos "puros" de linguagem e modelos agentes prontos (como o Compound)
-- Que nem todo modelo de IA suporta "tool calling" — e a importância de verificar isso antes de montar o fluxo
-- Como debugar erros no n8n usando a aba de **Executions**
-- Boas práticas de segurança: nunca publicar credenciais, IDs de planilha ou tokens reais em repositórios públicos
+- Montar um AI Agent no n8n ligando modelo, memória e ferramentas
+- A diferença entre um modelo de linguagem comum e um modelo que já vem como agente pronto, como o Compound
+- Usar a aba Executions para descobrir onde o fluxo quebrou
+- Nunca publicar credencial, ID de planilha ou token num repositório público
 
-## 🚀 Como usar
+## Como usar
 
-1. Importe o arquivo `.json` desta pasta no seu n8n (**Menu → Import from File**)
-2. Configure suas próprias credenciais (Groq, Google Sheets)
-3. Ative o workflow e clique em **"Open chat"** para testar
+1. Importe o `workflow.json` no n8n (Menu > Import from File)
+2. Configure suas credenciais da Groq e do Google Sheets
+3. Ative o workflow e clique em "Open chat" para testar
 
 ---
 
-*Veja também: [Assistente de Estudos via WhatsApp](../assistente-whatsapp-estudos), que leva esta estrutura para o WhatsApp.*
+Próximo projeto: [Assistente de Estudos via WhatsApp](../assistente-whatsapp-estudos), que leva esta estrutura para o WhatsApp.
