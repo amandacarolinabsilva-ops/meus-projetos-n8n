@@ -1,6 +1,6 @@
-# 🤖 Chat Básico — Agente de IA no n8n
+# 🤖 Agente de Chat com IA no n8n
 
-Meu primeiro projeto de automação usando **n8n** para criar um agente de chat com inteligência artificial. O objetivo foi aprender na prática como funcionam agentes de IA, integração com ferramentas externas (tools) e memória de conversa.
+Agente de chat com inteligência artificial construído no **n8n**, combinando modelo de linguagem, memória de conversa e ferramentas externas (tools) — a estrutura base de um AI Agent.
 
 ## 🧰 Tecnologias utilizadas
 
@@ -65,4 +65,4 @@ Utilizei o **Groq** como provedor do modelo de linguagem. Durante o desenvolvime
 
 ---
 
-*Projeto de estudo desenvolvido com n8n. Veja também: [Assistente de Estudos via WhatsApp](../assistente-whatsapp-estudos) — a evolução deste projeto.*
+*Veja também: [Assistente de Estudos via WhatsApp](../assistente-whatsapp-estudos), que leva esta estrutura para o WhatsApp.*
