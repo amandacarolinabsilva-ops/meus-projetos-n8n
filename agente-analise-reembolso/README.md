@@ -2,7 +2,7 @@
 
 Um agente que faz a triagem dos pedidos de reembolso de uma empresa (fictícia) de cursos online. Ele lê o pedido, cruza com o histórico do cliente, classifica o caso e decide a resposta: um e-mail automático para o cliente e, quando o caso pede atenção, um alerta para a equipe no Telegram.
 
-Nos dois projetos anteriores ([Agente de Chat](../chat-basico) e [Assistente via WhatsApp](../assistente-whatsapp-estudos)) a IA conversava. Aqui ela apoia uma decisão de negócio.
+A ideia veio da Imersão Agentes IA, da Hashtag Treinamentos. Nos dois projetos anteriores ([Agente de Chat](../chat-basico) e [Assistente via WhatsApp](../assistente-whatsapp-estudos)) a IA conversava. Aqui ela apoia uma decisão de negócio.
 
 **Ferramentas:** n8n, Google Gemini, Tally (formulário), Google Sheets, Gmail e Telegram
 
