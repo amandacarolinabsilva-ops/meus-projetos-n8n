@@ -1,94 +1,80 @@
-# 🤖📱 Assistente de Estudos via WhatsApp (n8n + IA)
+# Assistente de Estudos via WhatsApp
 
-Agente de inteligência artificial integrado ao WhatsApp, criado para atuar como um assistente pessoal de estudos, dúvidas, cursos e treinamentos. Parte da estrutura do [Agente de Chat](../chat-basico) e adiciona integração com o WhatsApp (Z-API), comandos personalizados e múltiplas ferramentas de busca.
+Um assistente que responde pelo WhatsApp dúvidas de estudo, cursos e programação. Parti da estrutura do [Agente de Chat](../chat-basico) e acrescentei a integração com o WhatsApp pela Z-API, busca na web e um comando `/quiz` que gera perguntas sobre qualquer tema.
 
-## 🧰 Tecnologias utilizadas
+**Ferramentas:** n8n, Groq (`openai/gpt-oss-120b`), Z-API, Google Sheets, SerpApi, Calculator e Wikipedia
 
-`n8n` · `Groq (LLM)` · `WhatsApp (Z-API)` · `Google Sheets` · `SerpApi` · `LangChain Tools (Calculator, Wikipedia)`
+## O que ele faz
 
-## 📋 O que o agente faz
+- Recebe e responde mensagens no WhatsApp
+- Lembra o contexto da conversa
+- Registra o histórico numa planilha do Google Sheets
+- Faz contas (Calculator), busca conceitos (Wikipedia) e procura informações atuais na web (SerpApi)
+- Com `/quiz [tema]`, gera na hora uma pergunta de múltipla escolha com gabarito
 
-- Recebe mensagens diretamente do **WhatsApp** através da **Z-API**
-- Responde dúvidas de estudos, cursos, programação e conceitos gerais
-- Mantém **memória da conversa**, lembrando o contexto entre mensagens
-- Registra o histórico de conversas em uma planilha do **Google Sheets**
-- Possui um **comando especial `/quiz [tema]`**, que gera automaticamente um quiz de múltipla escolha sobre qualquer assunto
-- Usa múltiplas ferramentas para enriquecer as respostas:
-  - 🧮 **Calculator** — cálculos matemáticos
-  - 📚 **Wikipedia** — conceitos, definições e fatos
-  - 🌐 **SerpApi (Google Search)** — busca de informações atuais na web
+## Como funciona
 
-## 🛠️ Arquitetura do workflow
+A Z-API manda cada mensagem recebida para um webhook do n8n. Um primeiro If valida a mensagem, e o Edit Fields separa o ID da conversa, o texto e o nome. Um segundo If confere se a mensagem começa com `/quiz`. Se começar, o fluxo tira o comando, pega o tema e monta um prompt pedindo que a IA crie direto uma pergunta com alternativas A, B, C e D e o gabarito, sem fazer perguntas antes. Se não começar, a mensagem segue o caminho normal de conversa.
+
+Nos dois casos a conversa é salva no Sheets, o AI Agent responde usando as ferramentas que precisar, e um HTTP Request devolve a resposta para o WhatsApp pela Z-API.
 
 | Node | Função |
 |---|---|
-| **Webhook** | Recebe as mensagens enviadas pela Z-API |
-| **If** | Validação inicial da mensagem recebida |
-| **Edit Fields** | Organiza os dados (ID da conversa, mensagem, nome) |
-| **If1** | Verifica se a mensagem é um comando `/quiz` |
-| **Edit Fields1** | Monta o prompt especial para gerar o quiz, quando aplicável |
-| **Append or update row in sheet** | Salva a conversa no Google Sheets |
-| **AI Agent** | Orquestra o raciocínio, decide quais ferramentas usar |
-| **Groq Chat Model** | Modelo de linguagem (openai/gpt-oss-120b via Groq) |
-| **Simple Memory** | Mantém o histórico da conversa por sessão |
-| **Calculator / Wikipedia / SerpApi** | Ferramentas disponíveis para o agente |
-| **HTTP Request** | Envia a resposta de volta ao WhatsApp via Z-API |
+| Webhook | Recebe as mensagens da Z-API |
+| If | Valida a mensagem recebida |
+| Edit Fields | Organiza ID da conversa, mensagem e nome |
+| If1 | Confere se é um comando `/quiz` |
+| Edit Fields1 | Monta o prompt do quiz |
+| Append or update row in sheet | Salva a conversa |
+| AI Agent, Groq Chat Model e Simple Memory | Respondem e guardam o histórico |
+| Calculator, Wikipedia e SerpApi | Ferramentas do agente |
+| HTTP Request | Envia a resposta de volta pela Z-API |
 
-## 🧠 Lógica do comando `/quiz`
+## Prints
 
-Quando a mensagem começa com `/quiz [tema]`, o fluxo desvia para um caminho especial que:
-1. Remove o comando e extrai o tema da mensagem
-2. Monta um prompt instruindo a IA a gerar diretamente uma pergunta de múltipla escolha (sem pedir esclarecimentos antes)
-3. Envia esse prompt para o AI Agent, que responde com a pergunta formatada (alternativas A/B/C/D + gabarito)
-
-Mensagens que não começam com `/quiz` seguem o fluxo normal de conversa.
-
-## 📸 Prints do workflow e da conversa
-
-**Estrutura do workflow no n8n:**
+Estrutura do workflow:
 
 ![Workflow](workflow.png)
 
-**Conversa real com o assistente — conceitos, cálculos e explicações:**
+Explicando um conceito e fazendo uma conta:
 
 ![Conversa - Explicação de API e Calculator](conversa1.png)
 
-**Buscando conceitos (Wikipedia) e informações atuais (SerpApi):**
+Buscando na Wikipedia e na web:
 
 ![Conversa - Wikipedia e busca na web](conversa2.png)
 
-**Comando especial `/quiz` gerando perguntas sobre Programação Orientada a Objetos:**
+Comando `/quiz` sobre Programação Orientada a Objetos:
 
 ![Conversa - Comando quiz](conversa3.png)
 
-**Teste de memória — o assistente lembra o contexto da conversa:**
+Teste de memória, com o assistente lembrando o que foi dito antes:
 
 ![Conversa - Teste de memória](conversa4.png)
 
-## 💡 O que aprendi neste projeto
+## O que aprendi
 
-- Diferença entre **URL de teste** e **URL de produção** em Webhooks do n8n
-- Como integrar o n8n com uma API externa de WhatsApp (Z-API)
-- Como usar o node **If** para criar lógica condicional e comandos especiais dentro de um agente de IA
-- Ajustar o **System Message** de um agente para modular seu comportamento e prioridades
-- A importância de **nunca publicar credenciais, tokens ou IDs de instância reais** em repositórios públicos
+- A diferença entre a URL de teste e a URL de produção do webhook no n8n
+- Integrar o n8n com uma API externa de WhatsApp
+- Usar o If para criar comandos dentro de um agente
+- Ajustar o System Message para mudar o comportamento e as prioridades do agente
 
-## ⚠️ Sobre segurança
+## Limitações
 
-Este repositório contém o workflow com **placeholders genéricos** no lugar de credenciais reais (IDs de planilha, Instance ID e Token da Z-API, etc.). Para usar este workflow, substitua os placeholders pelos seus próprios dados nas respectivas plataformas.
+- Na conta gratuita da Z-API, toda mensagem enviada sai com o aviso "Mensagem de teste". É coisa da plataforma, não do workflow.
+- O plano gratuito da Groq tem limite de requisições. Testando muito seguido, o AI Agent pode dar erro de rate limit por um tempo.
 
-## ⚙️ Limitações conhecidas
+## Segurança
 
-- Contas gratuitas/trial da **Z-API** inserem um aviso automático ("Mensagem de teste") em todas as mensagens enviadas — isso é uma característica da plataforma, não um erro do workflow.
-- O plano gratuito da **Groq** possui limite de requisições por minuto/dia. Em uso intenso de testes, o node "AI Agent" pode retornar erro de *rate limit* temporariamente.
+O `workflow.json` deste repositório usa valores genéricos no lugar das credenciais, do ID da planilha e do Instance ID e Token da Z-API. Para usar, troque pelos seus.
 
-## 🚀 Como usar
+## Como usar
 
-1. Importe o arquivo `workflow.json` desta pasta no seu n8n (**Menu → Import from File**)
-2. Configure suas próprias credenciais (Groq, Google Sheets, SerpApi)
-3. Configure sua instância da Z-API e substitua o Instance ID/Token no node HTTP Request
-4. Publique o workflow para receber e responder mensagens automaticamente
+1. Importe o `workflow.json` no n8n (Menu > Import from File)
+2. Configure suas credenciais da Groq, do Google Sheets e da SerpApi
+3. No node HTTP Request, coloque o Instance ID e o Token da sua instância da Z-API
+4. Publique o workflow para começar a receber mensagens
 
 ---
 
-*Projeto desenvolvido com n8n, integrando IA generativa e automação de WhatsApp. Veja também: [Agente de Chat](../chat-basico), a base deste projeto.*
+Projeto anterior: [Agente de Chat](../chat-basico). Próximo: [Agente de Análise de Reembolso](../agente-analise-reembolso).
