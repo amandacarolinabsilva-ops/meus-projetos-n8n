@@ -14,6 +14,8 @@ Automações e agentes de IA que construí com n8n. Cada pasta tem um projeto, c
 
 Comecei pelo agente de chat para entender as três peças de um agente no n8n: modelo, memória e ferramentas. Depois levei essa mesma base para o WhatsApp, o que me obrigou a lidar com webhook, uma API externa e comandos personalizados. No agente de reembolso o objetivo mudou: em vez de conversar, a IA precisava apoiar uma decisão de negócio, e aí entraram regras, classificação de clientes e mais de um canal de resposta.
 
+O maior desafio nos três foi aprender a própria plataforma: entender como o n8n funciona e como montar a lógica de um fluxo, com os dados passando de um node para o outro. Fui aprendendo na prática, um projeto de cada vez.
+
 ## Como usar
 
 1. Escolha a pasta do projeto
@@ -23,7 +25,7 @@ Comecei pelo agente de chat para entender as três peças de um agente no n8n: m
 
 ## Certificado
 
-Imersão Agentes IA, da Hashtag Treinamentos (8 horas), concluída em 23/07/2026.
+Imersão Agentes IA, da Hashtag Treinamentos (8 horas), concluída em 23/07/2026. Foi dela que veio a ideia do agente de reembolso.
 
 ![Certificado Imersão Agentes IA](./certificados/certificado-imersao-agentes-ia.png)
 
