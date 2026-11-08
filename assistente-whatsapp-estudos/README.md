@@ -1,6 +1,6 @@
 # 🤖📱 Assistente de Estudos via WhatsApp (n8n + IA)
 
-Agente de inteligência artificial integrado ao WhatsApp, criado para atuar como um assistente pessoal de estudos, dúvidas, cursos e treinamentos. Evolução do [Chat Básico](../chat-basico), meu primeiro projeto com n8n — agora com integração real via WhatsApp (Z-API), comandos personalizados e múltiplas ferramentas de busca.
+Agente de inteligência artificial integrado ao WhatsApp, criado para atuar como um assistente pessoal de estudos, dúvidas, cursos e treinamentos. Parte da estrutura do [Agente de Chat](../chat-basico) e adiciona integração com o WhatsApp (Z-API), comandos personalizados e múltiplas ferramentas de busca.
 
 ## 🧰 Tecnologias utilizadas
 
@@ -91,4 +91,4 @@ Este repositório contém o workflow com **placeholders genéricos** no lugar de
 
 ---
 
-*Projeto de estudo desenvolvido com n8n, integrando IA generativa e automação de WhatsApp. Veja também: [Chat Básico](../chat-basico) — o projeto que deu origem a este.*
+*Projeto desenvolvido com n8n, integrando IA generativa e automação de WhatsApp. Veja também: [Agente de Chat](../chat-basico), a base deste projeto.*
