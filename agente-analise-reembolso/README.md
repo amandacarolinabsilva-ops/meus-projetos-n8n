@@ -2,7 +2,7 @@
 
 Agente de IA para automatizar o processo de solicitação de reembolso de uma empresa de venda de cursos online. O sistema classifica o cliente e a solicitação, e decide automaticamente como responder — por e-mail e/ou alertando a equipe via Telegram.
 
-Terceiro projeto da série de estudos com n8n, após o [Chat Básico](../chat-basico) e o [Assistente de Estudos via WhatsApp](../assistente-whatsapp-estudos) — aqui o foco passa de "conversas" para automação de um **processo de decisão de negócio real**.
+Terceiro projeto da série com n8n, após o [Agente de Chat](../chat-basico) e o [Assistente de Estudos via WhatsApp](../assistente-whatsapp-estudos) — aqui o foco passa de "conversas" para automação de um **processo de decisão de negócio real**.
 
 ## 🧰 Tecnologias utilizadas
 
@@ -142,4 +142,4 @@ Este workflow lida com **dados reais de clientes** (nome, e-mail, histórico de 
 
 ---
 
-*Projeto de estudo desenvolvido com n8n, aplicando IA a um processo real de decisão de negócio. Veja também: [Assistente de Estudos via WhatsApp](../assistente-whatsapp-estudos) — o projeto anterior desta série.*
+*Projeto desenvolvido com n8n, aplicando IA a um processo real de decisão de negócio. Veja também: [Assistente de Estudos via WhatsApp](../assistente-whatsapp-estudos) — o projeto anterior desta série.*
